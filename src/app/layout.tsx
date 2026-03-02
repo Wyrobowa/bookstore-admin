@@ -27,7 +27,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" data-theme="sanzo-152-light">
+    <html lang="en" data-theme="light">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
           <ClientShell>{children}</ClientShell>
