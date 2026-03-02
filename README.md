@@ -1,6 +1,6 @@
-# tharaday-admin
+# bookstore-admin
 
-Admin panel for the Tharaday ecosystem.
+Admin panel for the bookstore ecosystem.
 
 ## Stack
 

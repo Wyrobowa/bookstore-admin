@@ -51,7 +51,7 @@ export default function LoginPage() {
     >
       <Box className="auth-card" display="flex" flexDirection="column" gap={5}>
         <Text variant="h2" weight="bold">
-          Tharaday Admin Login
+          Bookstore Admin Login
         </Text>
 
         <form

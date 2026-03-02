@@ -100,7 +100,7 @@ export default function ClientShell({
 
   return (
     <AppLayout
-      headerTitle="Tharaday Admin"
+      headerTitle="Bookstore Admin"
       maxWidth="92%"
       user={userName ? { name: userName } : undefined}
       navItems={[

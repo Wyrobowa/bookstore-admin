@@ -11,8 +11,8 @@ export type AuthSession = {
   user: AuthUser;
 };
 
-const AUTH_STORAGE_KEY = 'tharaday_admin_auth_session';
-const AUTH_CHANGED_EVENT = 'tharaday-admin:auth-changed';
+const AUTH_STORAGE_KEY = 'bookstore_admin_auth_session';
+const AUTH_CHANGED_EVENT = 'bookstore-admin:auth-changed';
 
 function isBrowser() {
   return typeof window !== 'undefined';

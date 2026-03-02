@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Tharaday Admin',
-  description: 'Admin panel for Tharaday platform',
+  title: 'Bookstore Admin',
+  description: 'Admin panel for the bookstore platform',
 };
 
 export default function RootLayout({
