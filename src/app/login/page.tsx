@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { Box, Button, Text } from 'tharaday';
+import { Box, Button, Input, Text } from 'tharaday';
 
 import { LoginFormValues, loginSchema } from '@/features/auth/login-schema';
 import { apiRequest } from '@/lib/api-client';
@@ -58,21 +58,25 @@ export default function LoginPage() {
           className="admin-form"
           onSubmit={handleSubmit((values) => loginMutation.mutate(values))}
         >
-          <label className="admin-field">
-            <span>Email</span>
-            <input type="email" autoComplete="email" {...register('email')} />
-            {errors.email && <small>{errors.email.message}</small>}
-          </label>
+          <Input
+            type="email"
+            autoComplete="email"
+            label="Email"
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message}
+            fullWidth
+            {...register('email')}
+          />
 
-          <label className="admin-field">
-            <span>Password</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              {...register('password')}
-            />
-            {errors.password && <small>{errors.password.message}</small>}
-          </label>
+          <Input
+            type="password"
+            autoComplete="current-password"
+            label="Password"
+            error={Boolean(errors.password)}
+            helperText={errors.password?.message}
+            fullWidth
+            {...register('password')}
+          />
 
           {loginMutation.isError && (
             <Text color="danger">{(loginMutation.error as Error).message}</Text>
@@ -80,11 +84,11 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            isLoading={loginMutation.isPending}
+            disabled={loginMutation.isPending}
             size="lg"
             fullWidth
           >
-            Sign in
+            {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
       </Box>

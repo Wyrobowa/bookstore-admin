@@ -1,7 +1,17 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Box, Loader, Text } from 'tharaday';
+import {
+  Box,
+  Loader,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Text,
+} from 'tharaday';
 
 import { apiRequest } from '@/lib/api-client';
 
@@ -47,30 +57,30 @@ export default function BooksPage() {
 
       {booksQuery.data && (
         <Box className="admin-table-wrap" border borderRadius="md">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table striped hoverable>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Author</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {booksQuery.data.map((book) => (
-                <tr key={book.id}>
-                  <td>{book.id}</td>
-                  <td>{book.title}</td>
-                  <td>
+                <TableRow key={book.id}>
+                  <TableCell>{book.id}</TableCell>
+                  <TableCell>{book.title}</TableCell>
+                  <TableCell>
                     {[book.author_first_name, book.author_last_name]
                       .filter(Boolean)
                       .join(' ') || '-'}
-                  </td>
-                  <td>{book.status || '-'}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell>{book.status || '-'}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </Box>
       )}
     </Box>

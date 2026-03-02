@@ -3,7 +3,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Box, Button, Loader, Text } from 'tharaday';
+import {
+  Box,
+  Button,
+  Input,
+  Loader,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Text,
+} from 'tharaday';
 
 import {
   CreateUserFormValues,
@@ -92,45 +104,54 @@ export default function UsersPage() {
           className="admin-form admin-form-grid"
           onSubmit={handleSubmit((values) => createUserMutation.mutate(values))}
         >
-          <label className="admin-field">
-            <span>Name</span>
-            <input type="text" {...register('name')} />
-            {errors.name && <small>{errors.name.message}</small>}
-          </label>
+          <Input
+            type="text"
+            label="Name"
+            error={Boolean(errors.name)}
+            helperText={errors.name?.message}
+            fullWidth
+            {...register('name')}
+          />
 
-          <label className="admin-field">
-            <span>Email</span>
-            <input type="email" {...register('email')} />
-            {errors.email && <small>{errors.email.message}</small>}
-          </label>
+          <Input
+            type="email"
+            label="Email"
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message}
+            fullWidth
+            {...register('email')}
+          />
 
-          <label className="admin-field">
-            <span>Password</span>
-            <input type="password" {...register('password')} />
-            {errors.password && <small>{errors.password.message}</small>}
-          </label>
+          <Input
+            type="password"
+            label="Password"
+            error={Boolean(errors.password)}
+            helperText={errors.password?.message}
+            fullWidth
+            {...register('password')}
+          />
 
-          <label className="admin-field">
-            <span>Role ID</span>
-            <input
-              type="number"
-              min={1}
-              step={1}
-              {...register('role_id', { valueAsNumber: true })}
-            />
-            {errors.role_id && <small>{errors.role_id.message}</small>}
-          </label>
+          <Input
+            type="number"
+            label="Role ID"
+            min={1}
+            step={1}
+            error={Boolean(errors.role_id)}
+            helperText={errors.role_id?.message}
+            fullWidth
+            {...register('role_id', { valueAsNumber: true })}
+          />
 
-          <label className="admin-field">
-            <span>Status ID</span>
-            <input
-              type="number"
-              min={1}
-              step={1}
-              {...register('status_id', { valueAsNumber: true })}
-            />
-            {errors.status_id && <small>{errors.status_id.message}</small>}
-          </label>
+          <Input
+            type="number"
+            label="Status ID"
+            min={1}
+            step={1}
+            error={Boolean(errors.status_id)}
+            helperText={errors.status_id?.message}
+            fullWidth
+            {...register('status_id', { valueAsNumber: true })}
+          />
 
           {createUserMutation.isError && (
             <Text color="danger">
@@ -139,8 +160,10 @@ export default function UsersPage() {
           )}
 
           <Box>
-            <Button type="submit" isLoading={createUserMutation.isPending}>
-              Create user
+            <Button type="submit" disabled={createUserMutation.isPending}>
+              {createUserMutation.isPending
+                ? 'Creating user...'
+                : 'Create user'}
             </Button>
           </Box>
         </form>
@@ -173,28 +196,28 @@ export default function UsersPage() {
 
         {usersQuery.data && (
           <Box className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table striped hoverable>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {usersQuery.data.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.id}</td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.role_id ?? '-'}</td>
-                    <td>{user.status_id ?? '-'}</td>
-                  </tr>
+                  <TableRow key={user.id}>
+                    <TableCell>{user.id}</TableCell>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.role_id ?? '-'}</TableCell>
+                    <TableCell>{user.status_id ?? '-'}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </Box>
         )}
       </Box>
