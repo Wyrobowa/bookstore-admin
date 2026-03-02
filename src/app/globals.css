@@ -1,0 +1,106 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: #111111;
+}
+
+.auth-page-wrapper {
+  min-height: 100vh;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, #d5ebff 0%, transparent 35%),
+    radial-gradient(circle at bottom left, #deffe8 0%, transparent 40%),
+    #f6f8fb;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid #d9e0e8;
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-field > span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-field > input {
+  border: 1px solid #c8d0da;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.admin-field > input:focus {
+  border-color: #2278ff;
+  outline: 2px solid rgba(34, 120, 255, 0.2);
+}
+
+.admin-field > small {
+  color: #c12a2a;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table thead {
+  background: #f2f6fa;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #e5ebf2;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 20px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 10px;
+  }
+}
