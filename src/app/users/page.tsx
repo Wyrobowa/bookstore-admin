@@ -1,12 +1,13 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Box } from 'tharaday';
+import { Box, Button, Text } from 'tharaday';
 
+import { ConfirmActionModal } from '@/app/_components/ConfirmActionModal';
 import { PaginatedTableSection } from '@/app/_components/PaginatedTableSection';
 import { useClientPagination } from '@/app/_hooks/useClientPagination';
-import { CreateUserCard } from '@/app/users/_components/CreateUserCard';
+import { UserFormModal } from '@/app/users/_components/UserFormModal';
 import { UsersFilters } from '@/app/users/_components/UsersFilters';
 import { UsersTable } from '@/app/users/_components/UsersTable';
 import { User } from '@/app/users/types';
@@ -16,18 +17,89 @@ const USERS_PAGE_SIZE = 10;
 const ALL_FILTER = 'all';
 const NONE_FILTER = 'none';
 
+type UserFormPayload = {
+  name: string;
+  email: string;
+  password?: string;
+  role_id: number;
+  status_id: number;
+};
+
+type LookupItem = {
+  id: number;
+  name: string;
+};
+
 async function loadUsers() {
   return apiRequest<User[]>('/users');
 }
 
 export default function UsersPage() {
+  const queryClient = useQueryClient();
   const [searchValue, setSearchValue] = useState('');
   const [roleFilter, setRoleFilter] = useState(ALL_FILTER);
   const [statusFilter, setStatusFilter] = useState(ALL_FILTER);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ['users'],
     queryFn: loadUsers,
+  });
+  const rolesQuery = useQuery({
+    queryKey: ['roles'],
+    queryFn: () => apiRequest<LookupItem[]>('/roles'),
+  });
+  const statusesQuery = useQuery({
+    queryKey: ['statuses'],
+    queryFn: () => apiRequest<LookupItem[]>('/statuses'),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (payload: UserFormPayload) =>
+      apiRequest<User>('/users', {
+        method: 'POST',
+        body: payload,
+      }),
+    onSuccess: async () => {
+      setIsCreateOpen(false);
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-counts'] });
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: ({
+      userId,
+      payload,
+    }: {
+      userId: number;
+      payload: UserFormPayload;
+    }) =>
+      apiRequest<User>('/users', {
+        method: 'PATCH',
+        body: {
+          id: userId,
+          ...payload,
+        },
+      }),
+    onSuccess: async () => {
+      setEditingUser(null);
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (userId: number) =>
+      apiRequest<null>(`/users?id=${userId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: async () => {
+      setDeletingUser(null);
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-counts'] });
+    },
   });
 
   const users = usersQuery.data || [];
@@ -39,15 +111,15 @@ export default function UsersPage() {
         roleFilter === ALL_FILTER
           ? true
           : roleFilter === NONE_FILTER
-            ? user.role_id === null
-            : user.role_id === Number(roleFilter);
+            ? user.role === null
+            : (user.role || '').toLowerCase() === roleFilter;
 
       const statusMatches =
         statusFilter === ALL_FILTER
           ? true
           : statusFilter === NONE_FILTER
-            ? user.status_id === null
-            : user.status_id === Number(statusFilter);
+            ? user.status === null
+            : (user.status || '').toLowerCase() === statusFilter;
 
       const searchMatches =
         normalizedSearch.length === 0
@@ -61,42 +133,44 @@ export default function UsersPage() {
   }, [roleFilter, searchValue, statusFilter, users]);
 
   const roleOptions = useMemo(() => {
-    const roleIds = Array.from(
-      new Set(
-        users
-          .map((user) => user.role_id)
-          .filter((value): value is number => value !== null),
-      ),
-    ).sort((a, b) => a - b);
+    const roles = rolesQuery.data || [];
 
     return [
       { value: ALL_FILTER, label: 'All roles' },
       { value: NONE_FILTER, label: 'No role' },
-      ...roleIds.map((value) => ({
-        value: String(value),
-        label: `Role ${value}`,
+      ...roles.map((role) => ({
+        value: role.name.toLowerCase(),
+        label: role.name,
       })),
     ];
-  }, [users]);
+  }, [rolesQuery.data]);
 
   const statusOptions = useMemo(() => {
-    const statusIds = Array.from(
-      new Set(
-        users
-          .map((user) => user.status_id)
-          .filter((value): value is number => value !== null),
-      ),
-    ).sort((a, b) => a - b);
+    const statuses = statusesQuery.data || [];
 
     return [
       { value: ALL_FILTER, label: 'All statuses' },
       { value: NONE_FILTER, label: 'No status' },
-      ...statusIds.map((value) => ({
-        value: String(value),
-        label: `Status ${value}`,
+      ...statuses.map((status) => ({
+        value: status.name.toLowerCase(),
+        label: status.name,
       })),
     ];
-  }, [users]);
+  }, [statusesQuery.data]);
+
+  const roleModalOptions = useMemo(() => {
+    return (rolesQuery.data || []).map((role) => ({
+      value: String(role.id),
+      label: role.name,
+    }));
+  }, [rolesQuery.data]);
+
+  const statusModalOptions = useMemo(() => {
+    return (statusesQuery.data || []).map((status) => ({
+      value: String(status.id),
+      label: status.name,
+    }));
+  }, [statusesQuery.data]);
 
   const { page, setPage, totalPages, paginatedItems } = useClientPagination({
     items: filteredUsers,
@@ -109,7 +183,19 @@ export default function UsersPage() {
 
   return (
     <Box display="flex" flexDirection="column" gap={8}>
-      <CreateUserCard onCreated={() => setPage(1)} />
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        gap={4}
+      >
+        <Text variant="h3" weight="bold">
+          Users
+        </Text>
+        <Button variant="outline" onClick={() => setIsCreateOpen(true)}>
+          Add user
+        </Button>
+      </Box>
 
       <UsersFilters
         searchValue={searchValue}
@@ -134,8 +220,55 @@ export default function UsersPage() {
         page={page}
         onPageChange={setPage}
       >
-        <UsersTable users={paginatedItems} />
+        <UsersTable
+          users={paginatedItems}
+          onEdit={(user) => setEditingUser(user)}
+          onDelete={(user) => setDeletingUser(user)}
+        />
       </PaginatedTableSection>
+
+      <UserFormModal
+        isOpen={isCreateOpen}
+        mode="create"
+        isPending={createMutation.isPending}
+        errorMessage={(createMutation.error as Error | null)?.message}
+        roleOptions={roleModalOptions}
+        statusOptions={statusModalOptions}
+        onClose={() => setIsCreateOpen(false)}
+        onSubmit={(payload) => createMutation.mutate(payload)}
+      />
+
+      <UserFormModal
+        isOpen={Boolean(editingUser)}
+        mode="edit"
+        user={editingUser}
+        isPending={editMutation.isPending}
+        errorMessage={(editMutation.error as Error | null)?.message}
+        roleOptions={roleModalOptions}
+        statusOptions={statusModalOptions}
+        onClose={() => setEditingUser(null)}
+        onSubmit={(payload) => {
+          if (!editingUser) {
+            return;
+          }
+          editMutation.mutate({ userId: editingUser.id, payload });
+        }}
+      />
+
+      <ConfirmActionModal
+        isOpen={Boolean(deletingUser)}
+        title="Delete user"
+        message={`Are you sure you want to delete "${deletingUser?.name ?? ''}"? This action cannot be undone.`}
+        confirmLabel="Delete user"
+        isPending={deleteMutation.isPending}
+        onClose={() => setDeletingUser(null)}
+        onConfirm={() => {
+          if (!deletingUser) {
+            return;
+          }
+          deleteMutation.mutate(deletingUser.id);
+        }}
+      />
     </Box>
   );
 }

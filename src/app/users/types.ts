@@ -4,4 +4,6 @@ export type User = {
   email: string;
   role_id: number | null;
   status_id: number | null;
+  role: string | null;
+  status: string | null;
 };
