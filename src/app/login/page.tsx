@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Box, Button, Input, Text } from 'tharaday';
 
-import { LoginFormValues, loginSchema } from '@/features/auth/login-schema';
+import { LoginFormValues, loginSchema } from '@/app/login/schema';
 import { apiRequest } from '@/lib/api-client';
 import { AuthSession, writeAuthSession } from '@/lib/auth';
 

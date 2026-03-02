@@ -1,226 +1,141 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import {
-  Box,
-  Button,
-  Input,
-  Loader,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Text,
-} from 'tharaday';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { Box } from 'tharaday';
 
-import {
-  CreateUserFormValues,
-  createUserSchema,
-} from '@/features/users/user-schema';
+import { PaginatedTableSection } from '@/app/_components/PaginatedTableSection';
+import { useClientPagination } from '@/app/_hooks/useClientPagination';
+import { CreateUserCard } from '@/app/users/_components/CreateUserCard';
+import { UsersFilters } from '@/app/users/_components/UsersFilters';
+import { UsersTable } from '@/app/users/_components/UsersTable';
+import { User } from '@/app/users/types';
 import { apiRequest } from '@/lib/api-client';
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role_id: number | null;
-  status_id: number | null;
-};
+const USERS_PAGE_SIZE = 10;
+const ALL_FILTER = 'all';
+const NONE_FILTER = 'none';
 
 async function loadUsers() {
   return apiRequest<User[]>('/users');
 }
 
 export default function UsersPage() {
-  const queryClient = useQueryClient();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      role_id: 2,
-      status_id: 1,
-    },
-  });
+  const [searchValue, setSearchValue] = useState('');
+  const [roleFilter, setRoleFilter] = useState(ALL_FILTER);
+  const [statusFilter, setStatusFilter] = useState(ALL_FILTER);
 
   const usersQuery = useQuery({
     queryKey: ['users'],
     queryFn: loadUsers,
   });
 
-  const createUserMutation = useMutation({
-    mutationFn: (payload: CreateUserFormValues) =>
-      apiRequest<User>('/users', {
-        method: 'POST',
-        body: payload,
-      }),
-    onSuccess: async () => {
-      reset({
-        name: '',
-        email: '',
-        password: '',
-        role_id: 2,
-        status_id: 1,
-      });
-      await queryClient.invalidateQueries({ queryKey: ['users'] });
-      await queryClient.invalidateQueries({ queryKey: ['dashboard-counts'] });
-    },
+  const users = usersQuery.data || [];
+  const filteredUsers = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    return users.filter((user) => {
+      const roleMatches =
+        roleFilter === ALL_FILTER
+          ? true
+          : roleFilter === NONE_FILTER
+            ? user.role_id === null
+            : user.role_id === Number(roleFilter);
+
+      const statusMatches =
+        statusFilter === ALL_FILTER
+          ? true
+          : statusFilter === NONE_FILTER
+            ? user.status_id === null
+            : user.status_id === Number(statusFilter);
+
+      const searchMatches =
+        normalizedSearch.length === 0
+          ? true
+          : `${user.name} ${user.email}`
+              .toLowerCase()
+              .includes(normalizedSearch);
+
+      return roleMatches && statusMatches && searchMatches;
+    });
+  }, [roleFilter, searchValue, statusFilter, users]);
+
+  const roleOptions = useMemo(() => {
+    const roleIds = Array.from(
+      new Set(
+        users
+          .map((user) => user.role_id)
+          .filter((value): value is number => value !== null),
+      ),
+    ).sort((a, b) => a - b);
+
+    return [
+      { value: ALL_FILTER, label: 'All roles' },
+      { value: NONE_FILTER, label: 'No role' },
+      ...roleIds.map((value) => ({
+        value: String(value),
+        label: `Role ${value}`,
+      })),
+    ];
+  }, [users]);
+
+  const statusOptions = useMemo(() => {
+    const statusIds = Array.from(
+      new Set(
+        users
+          .map((user) => user.status_id)
+          .filter((value): value is number => value !== null),
+      ),
+    ).sort((a, b) => a - b);
+
+    return [
+      { value: ALL_FILTER, label: 'All statuses' },
+      { value: NONE_FILTER, label: 'No status' },
+      ...statusIds.map((value) => ({
+        value: String(value),
+        label: `Status ${value}`,
+      })),
+    ];
+  }, [users]);
+
+  const { page, setPage, totalPages, paginatedItems } = useClientPagination({
+    items: filteredUsers,
+    pageSize: USERS_PAGE_SIZE,
   });
 
+  useEffect(() => {
+    setPage(1);
+  }, [roleFilter, searchValue, setPage, statusFilter]);
+
   return (
-    <Box display="flex" flexDirection="column" gap={8} paddingY="48px">
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Text variant="h1" weight="bold">
-          User Management
-        </Text>
-        <Text color="subtle">
-          Create users and review account records from one place.
-        </Text>
-      </Box>
+    <Box display="flex" flexDirection="column" gap={8}>
+      <CreateUserCard onCreated={() => setPage(1)} />
 
-      <Box
-        border
-        borderRadius="md"
-        padding={6}
-        display="flex"
-        flexDirection="column"
-        gap={4}
+      <UsersFilters
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        roleFilter={roleFilter}
+        onRoleFilterChange={setRoleFilter}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        roleOptions={roleOptions}
+        statusOptions={statusOptions}
+      />
+
+      <PaginatedTableSection
+        title="Existing Users"
+        itemLabel="users"
+        isLoading={usersQuery.isLoading}
+        isError={usersQuery.isError}
+        errorMessage={(usersQuery.error as Error | null)?.message}
+        showingCount={paginatedItems.length}
+        totalCount={filteredUsers.length}
+        totalPages={totalPages}
+        page={page}
+        onPageChange={setPage}
       >
-        <Text variant="h4" weight="bold">
-          Create User
-        </Text>
-
-        <form
-          className="admin-form admin-form-grid"
-          onSubmit={handleSubmit((values) => createUserMutation.mutate(values))}
-        >
-          <Input
-            type="text"
-            label="Name"
-            error={Boolean(errors.name)}
-            helperText={errors.name?.message}
-            fullWidth
-            {...register('name')}
-          />
-
-          <Input
-            type="email"
-            label="Email"
-            error={Boolean(errors.email)}
-            helperText={errors.email?.message}
-            fullWidth
-            {...register('email')}
-          />
-
-          <Input
-            type="password"
-            label="Password"
-            error={Boolean(errors.password)}
-            helperText={errors.password?.message}
-            fullWidth
-            {...register('password')}
-          />
-
-          <Input
-            type="number"
-            label="Role ID"
-            min={1}
-            step={1}
-            error={Boolean(errors.role_id)}
-            helperText={errors.role_id?.message}
-            fullWidth
-            {...register('role_id', { valueAsNumber: true })}
-          />
-
-          <Input
-            type="number"
-            label="Status ID"
-            min={1}
-            step={1}
-            error={Boolean(errors.status_id)}
-            helperText={errors.status_id?.message}
-            fullWidth
-            {...register('status_id', { valueAsNumber: true })}
-          />
-
-          {createUserMutation.isError && (
-            <Text color="danger">
-              {(createUserMutation.error as Error).message}
-            </Text>
-          )}
-
-          <Box>
-            <Button type="submit" disabled={createUserMutation.isPending}>
-              {createUserMutation.isPending
-                ? 'Creating user...'
-                : 'Create user'}
-            </Button>
-          </Box>
-        </form>
-      </Box>
-
-      <Box
-        border
-        borderRadius="md"
-        padding={6}
-        display="flex"
-        flexDirection="column"
-        gap={4}
-      >
-        <Text variant="h4" weight="bold">
-          Existing Users
-        </Text>
-
-        {usersQuery.isLoading && (
-          <Box display="flex" alignItems="center" gap={3}>
-            <Loader size="md" />
-            <Text color="subtle">Loading users...</Text>
-          </Box>
-        )}
-
-        {usersQuery.isError && (
-          <Text color="danger">
-            Failed to fetch users: {(usersQuery.error as Error).message}
-          </Text>
-        )}
-
-        {usersQuery.data && (
-          <Box className="admin-table-wrap">
-            <Table striped hoverable>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {usersQuery.data.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.id}</TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role_id ?? '-'}</TableCell>
-                    <TableCell>{user.status_id ?? '-'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
-        )}
-      </Box>
+        <UsersTable users={paginatedItems} />
+      </PaginatedTableSection>
     </Box>
   );
 }

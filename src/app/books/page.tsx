@@ -1,88 +1,115 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import {
-  Box,
-  Loader,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Text,
-} from 'tharaday';
+import { useEffect, useMemo, useState } from 'react';
+import { Box } from 'tharaday';
 
+import { PaginatedTableSection } from '@/app/_components/PaginatedTableSection';
+import { useClientPagination } from '@/app/_hooks/useClientPagination';
+import { BooksFilters } from '@/app/books/_components/BooksFilters';
+import { BooksTable } from '@/app/books/_components/BooksTable';
+import { Book } from '@/app/books/types';
 import { apiRequest } from '@/lib/api-client';
 
-type Book = {
-  id: number;
-  title: string;
-  status: string | null;
-  author_first_name: string | null;
-  author_last_name: string | null;
-};
+const BOOKS_PAGE_SIZE = 10;
+const ALL_FILTER = 'all';
+const NONE_FILTER = 'none';
 
 async function loadBooks() {
   return apiRequest<Book[]>('/books');
 }
 
 export default function BooksPage() {
+  const [searchValue, setSearchValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState(ALL_FILTER);
+
   const booksQuery = useQuery({
     queryKey: ['books'],
     queryFn: loadBooks,
   });
 
+  const books = booksQuery.data || [];
+  const filteredBooks = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    return books.filter((book) => {
+      const statusMatches =
+        statusFilter === ALL_FILTER
+          ? true
+          : statusFilter === NONE_FILTER
+            ? book.status === null
+            : (book.status || '').toLowerCase() === statusFilter;
+
+      const authorName = [book.author_first_name, book.author_last_name]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      const searchMatches =
+        normalizedSearch.length === 0
+          ? true
+          : `${book.title} ${authorName}`
+              .toLowerCase()
+              .includes(normalizedSearch);
+
+      return statusMatches && searchMatches;
+    });
+  }, [books, searchValue, statusFilter]);
+
+  const statusOptions = useMemo(() => {
+    const statusValues = Array.from(
+      new Set(
+        books
+          .map((book) => book.status)
+          .filter(
+            (value): value is string =>
+              typeof value === 'string' && value.length > 0,
+          ),
+      ),
+    ).sort((a, b) => a.localeCompare(b));
+
+    return [
+      { value: ALL_FILTER, label: 'All statuses' },
+      { value: NONE_FILTER, label: 'No status' },
+      ...statusValues.map((value) => ({
+        value: value.toLowerCase(),
+        label: value,
+      })),
+    ];
+  }, [books]);
+
+  const { page, setPage, totalPages, paginatedItems } = useClientPagination({
+    items: filteredBooks,
+    pageSize: BOOKS_PAGE_SIZE,
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue, setPage, statusFilter]);
+
   return (
-    <Box display="flex" flexDirection="column" gap={6} paddingY="48px">
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Text variant="h1" weight="bold">
-          Book Catalog
-        </Text>
-        <Text color="subtle">Read-only list for quick operational checks.</Text>
-      </Box>
+    <Box display="flex" flexDirection="column" gap={6}>
+      <BooksFilters
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        statusOptions={statusOptions}
+      />
 
-      {booksQuery.isLoading && (
-        <Box display="flex" alignItems="center" gap={3}>
-          <Loader size="md" />
-          <Text color="subtle">Loading books...</Text>
-        </Box>
-      )}
-
-      {booksQuery.isError && (
-        <Text color="danger">
-          Failed to fetch books: {(booksQuery.error as Error).message}
-        </Text>
-      )}
-
-      {booksQuery.data && (
-        <Box className="admin-table-wrap" border borderRadius="md">
-          <Table striped hoverable>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {booksQuery.data.map((book) => (
-                <TableRow key={book.id}>
-                  <TableCell>{book.id}</TableCell>
-                  <TableCell>{book.title}</TableCell>
-                  <TableCell>
-                    {[book.author_first_name, book.author_last_name]
-                      .filter(Boolean)
-                      .join(' ') || '-'}
-                  </TableCell>
-                  <TableCell>{book.status || '-'}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Box>
-      )}
+      <PaginatedTableSection
+        title="Books"
+        itemLabel="books"
+        isLoading={booksQuery.isLoading}
+        isError={booksQuery.isError}
+        errorMessage={(booksQuery.error as Error | null)?.message}
+        showingCount={paginatedItems.length}
+        totalCount={filteredBooks.length}
+        totalPages={totalPages}
+        page={page}
+        onPageChange={setPage}
+      >
+        <BooksTable books={paginatedItems} />
+      </PaginatedTableSection>
     </Box>
   );
 }
