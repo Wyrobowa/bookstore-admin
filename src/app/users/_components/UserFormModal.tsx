@@ -158,12 +158,13 @@ export function UserFormModal({
         <Input
           label="Name"
           value={formState.name}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              name: event.currentTarget.value,
-            }))
-          }
+              name: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -171,12 +172,13 @@ export function UserFormModal({
           label="Email"
           type="email"
           value={formState.email}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              email: event.currentTarget.value,
-            }))
-          }
+              email: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -184,12 +186,13 @@ export function UserFormModal({
           label={mode === 'create' ? 'Password' : 'Password (optional)'}
           type="password"
           value={formState.password}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              password: event.currentTarget.value,
-            }))
-          }
+              password: value,
+            }));
+          }}
           helperText={
             mode === 'edit'
               ? 'Leave empty to keep current password.'
@@ -202,12 +205,13 @@ export function UserFormModal({
           label="Role"
           value={formState.roleId}
           options={roleOptions}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              roleId: event.currentTarget.value,
-            }))
-          }
+              roleId: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -215,12 +219,13 @@ export function UserFormModal({
           label="Status"
           value={formState.statusId}
           options={statusOptions}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              statusId: event.currentTarget.value,
-            }))
-          }
+              statusId: value,
+            }));
+          }}
           fullWidth
         />
       </form>

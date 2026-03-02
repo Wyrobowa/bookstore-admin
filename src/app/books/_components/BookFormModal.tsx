@@ -194,24 +194,26 @@ export function BookFormModal({
         <Input
           label="Title"
           value={formState.title}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              title: event.currentTarget.value,
-            }))
-          }
+              title: value,
+            }));
+          }}
           fullWidth
         />
 
         <Input
           label="Description"
           value={formState.description}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              description: event.currentTarget.value,
-            }))
-          }
+              description: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -219,12 +221,13 @@ export function BookFormModal({
           label="Type"
           value={formState.tagId}
           options={tagOptions}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              tagId: event.currentTarget.value,
-            }))
-          }
+              tagId: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -232,12 +235,13 @@ export function BookFormModal({
           label="Status"
           value={formState.statusId}
           options={statusOptions}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              statusId: event.currentTarget.value,
-            }))
-          }
+              statusId: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -245,12 +249,13 @@ export function BookFormModal({
           label="Author"
           value={formState.authorId}
           options={authorOptions}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              authorId: event.currentTarget.value,
-            }))
-          }
+              authorId: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -258,12 +263,13 @@ export function BookFormModal({
           label="Publisher"
           value={formState.publisherId}
           options={publisherOptions}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              publisherId: event.currentTarget.value,
-            }))
-          }
+              publisherId: value,
+            }));
+          }}
           fullWidth
         />
 
@@ -273,12 +279,13 @@ export function BookFormModal({
           min={1}
           step={1}
           value={formState.pages}
-          onChange={(event) =>
+          onChange={(event) => {
+            const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
-              pages: event.currentTarget.value,
-            }))
-          }
+              pages: value,
+            }));
+          }}
           fullWidth
         />
       </form>
