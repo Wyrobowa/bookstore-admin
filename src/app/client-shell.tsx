@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { AppLayout, Box, Loader, Text } from 'tharaday';
+import { AppLayout, Box, Header, Loader, NavBar, Text } from 'tharaday';
 
 import {
   authChangedEventName,
@@ -100,29 +100,37 @@ export default function ClientShell({
 
   return (
     <AppLayout
-      headerTitle="Bookstore Admin"
       maxWidth="92%"
-      user={userName ? { name: userName } : undefined}
-      navItems={[
-        { id: 'dashboard', label: 'Dashboard' },
-        { id: 'users', label: 'Users' },
-        { id: 'books', label: 'Books' },
-      ]}
-      activeNavId={activeNavId}
-      onNavItemClick={(id) => {
-        if (id === 'dashboard') {
-          router.push('/');
-          return;
-        }
+      header={
+        <Header
+          title="Bookstore Admin"
+          user={userName ? { name: userName } : undefined}
+          onLogin={() => router.push('/login')}
+          onLogout={() => {
+            clearAuthSession();
+            setUserName(null);
+            router.push('/login');
+          }}
+        />
+      }
+      navbar={
+        <NavBar
+          items={[
+            { id: 'dashboard', label: 'Dashboard' },
+            { id: 'users', label: 'Users' },
+            { id: 'books', label: 'Books' },
+          ]}
+          activeId={activeNavId}
+          onItemClick={(id) => {
+            if (id === 'dashboard') {
+              router.push('/');
+              return;
+            }
 
-        router.push(`/${id}`);
-      }}
-      onLogin={() => router.push('/login')}
-      onLogout={() => {
-        clearAuthSession();
-        setUserName(null);
-        router.push('/login');
-      }}
+            router.push(`/${id}`);
+          }}
+        />
+      }
     >
       {children}
     </AppLayout>
