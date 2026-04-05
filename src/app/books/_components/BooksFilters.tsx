@@ -1,3 +1,4 @@
+import { ChangeEvent } from 'react';
 import { Box, Input, Select } from 'tharaday';
 
 type FilterOption = {
@@ -30,14 +31,14 @@ export function BooksFilters({
         label="Search"
         placeholder="Title or author"
         value={searchValue}
-        onChange={(event) => onSearchChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchChange(event.currentTarget.value)}
         fullWidth
       />
 
       <Select
         label="Status"
         value={statusFilter}
-        onChange={(event) => onStatusFilterChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => onStatusFilterChange(event.currentTarget.value)}
         options={statusOptions}
         fullWidth
       />
