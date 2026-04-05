@@ -121,7 +121,7 @@ export default function ClientShell({
             { id: 'books', label: 'Books' },
           ]}
           activeId={activeNavId}
-          onItemClick={(id) => {
+          onItemClick={(id: string) => {
             if (id === 'dashboard') {
               router.push('/');
               return;

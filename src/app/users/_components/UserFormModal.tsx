@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Input, Modal, Select, Text } from 'tharaday';
 
 import { User } from '@/app/users/types';
@@ -158,7 +158,7 @@ export function UserFormModal({
         <Input
           label="Name"
           value={formState.name}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -172,7 +172,7 @@ export function UserFormModal({
           label="Email"
           type="email"
           value={formState.email}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -186,7 +186,7 @@ export function UserFormModal({
           label={mode === 'create' ? 'Password' : 'Password (optional)'}
           type="password"
           value={formState.password}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -205,7 +205,7 @@ export function UserFormModal({
           label="Role"
           value={formState.roleId}
           options={roleOptions}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -219,7 +219,7 @@ export function UserFormModal({
           label="Status"
           value={formState.statusId}
           options={statusOptions}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,

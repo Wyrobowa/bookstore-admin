@@ -1,3 +1,4 @@
+import { ChangeEvent } from 'react';
 import { Box, Input, Select } from 'tharaday';
 
 type FilterOption = {
@@ -36,14 +37,16 @@ export function UsersFilters({
         label="Search"
         placeholder="Name or email"
         value={searchValue}
-        onChange={(event) => onSearchChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchChange(event.currentTarget.value)}
         fullWidth
       />
 
       <Select
         label="Role"
         value={roleFilter}
-        onChange={(event) => onRoleFilterChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+          onRoleFilterChange(event.currentTarget.value)
+        }
         options={roleOptions}
         fullWidth
       />
@@ -51,7 +54,9 @@ export function UsersFilters({
       <Select
         label="Status"
         value={statusFilter}
-        onChange={(event) => onStatusFilterChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+          onStatusFilterChange(event.currentTarget.value)
+        }
         options={statusOptions}
         fullWidth
       />
