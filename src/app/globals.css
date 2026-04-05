@@ -19,8 +19,7 @@ body {
   padding: 24px;
   background:
     radial-gradient(circle at top right, #d5ebff 0%, transparent 35%),
-    radial-gradient(circle at bottom left, #deffe8 0%, transparent 40%),
-    #f6f8fb;
+    radial-gradient(circle at bottom left, #deffe8 0%, transparent 40%), #f6f8fb;
 }
 
 .auth-card {

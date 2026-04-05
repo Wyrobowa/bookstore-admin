@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Input, Modal, Select, Text } from 'tharaday';
 
 import { Book } from '@/app/books/types';
@@ -194,7 +194,7 @@ export function BookFormModal({
         <Input
           label="Title"
           value={formState.title}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -207,7 +207,7 @@ export function BookFormModal({
         <Input
           label="Description"
           value={formState.description}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -221,7 +221,7 @@ export function BookFormModal({
           label="Type"
           value={formState.tagId}
           options={tagOptions}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -235,7 +235,7 @@ export function BookFormModal({
           label="Status"
           value={formState.statusId}
           options={statusOptions}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -249,7 +249,7 @@ export function BookFormModal({
           label="Author"
           value={formState.authorId}
           options={authorOptions}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -263,7 +263,7 @@ export function BookFormModal({
           label="Publisher"
           value={formState.publisherId}
           options={publisherOptions}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
@@ -279,7 +279,7 @@ export function BookFormModal({
           min={1}
           step={1}
           value={formState.pages}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const { value } = event.currentTarget;
             setFormState((prev) => ({
               ...prev,
