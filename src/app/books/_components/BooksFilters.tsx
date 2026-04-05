@@ -38,7 +38,9 @@ export function BooksFilters({
       <Select
         label="Status"
         value={statusFilter}
-        onChange={(event: ChangeEvent<HTMLSelectElement>) => onStatusFilterChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+          onStatusFilterChange(event.currentTarget.value)
+        }
         options={statusOptions}
         fullWidth
       />
