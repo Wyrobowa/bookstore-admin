@@ -31,7 +31,9 @@ export function BooksFilters({
         label="Search"
         placeholder="Title or author"
         value={searchValue}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+          onSearchChange(event.currentTarget.value)
+        }
         fullWidth
       />
 
