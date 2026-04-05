@@ -37,7 +37,9 @@ export function UsersFilters({
         label="Search"
         placeholder="Name or email"
         value={searchValue}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => onSearchChange(event.currentTarget.value)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+          onSearchChange(event.currentTarget.value)
+        }
         fullWidth
       />
 
