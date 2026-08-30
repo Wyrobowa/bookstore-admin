@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Set base path
         id: vars
@@ -37,6 +37,13 @@ jobs:
             echo "base_path=" >> $GITHUB_OUTPUT
           else
             echo "base_path=/$REPO_NAME" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check required env vars
+        run: |
+          if [[ -z "${{ vars.NEXT_PUBLIC_API_BASE_URL }}" ]]; then
+            echo "Missing GitHub Actions variable: NEXT_PUBLIC_API_BASE_URL"
+            exit 1
           fi
 
       - name: Build static site
